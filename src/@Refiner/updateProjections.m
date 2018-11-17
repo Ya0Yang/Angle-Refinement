@@ -75,7 +75,7 @@ obj.refineFullProjections = original_projections;
 
 % recalculate the angles to make the reference index angles be at the same
 % given orientation
-euler_angles = reorient_Angles(euler_angles,obj.RefineReferenceAngleInd,obj.RefineZeroCenterFlag,obj.RefineReferenceAngletoSet);
+% euler_angles = reorient_Angles(euler_angles,obj.RefineReferenceAngleInd,obj.RefineZeroCenterFlag,obj.RefineReferenceAngletoSet);
 
 obj.refineAngles = euler_angles;
 
