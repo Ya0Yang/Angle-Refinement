@@ -49,7 +49,6 @@ compare_func           = @obj.compare_func;
 forwardProjection_func = @obj.forwardProjection_func;
 FPmask                 = obj.FPmask;
 
-EVALUATOR.compare_func = compare_func;
 % cropInd1 =  (1:dim1)-ncx + nc_padded1;
 % cropInd2 =  (1:dim2)-ncy + nc_padded2;
 

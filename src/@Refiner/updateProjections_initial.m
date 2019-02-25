@@ -14,7 +14,10 @@
 %% University of California, Los Angeles
 %% Copyright (c) 2015-2016. All Rights Reserved.
 
-function obj = updateProjections(obj)
+function obj = updateProjections_initial(obj)
+
+projectionSeq = obj.projectionSeq;
+
 [dimx,dimy,num_proj] = size(obj.refineFullProjections);
 ncx = round((dimx+1)/2);
 ncy = round((dimy+1)/2);
@@ -51,18 +54,12 @@ for proj_num    = 1:num_proj
 %     else
 %         best_ind = find(bayes_probs==min(bayes_probs(:)),1);
 %     end
-
-
-    best_ind = best_ind(1);
     best_center_x = centers_x(best_ind);
     best_center_y = centers_y(best_ind);
     euler_angles(proj_num,1) = phis(best_ind);
     euler_angles(proj_num,2) = thetas(best_ind);
     euler_angles(proj_num,3) = psis(best_ind);
-    %shiftX = ncx - (best_center_x * bin_factor - (bin_factor - 1)); % to understand the subtraction, consider that the center pixel of a 100x100 array is 51, and if this
-    % was an array that had been binned by 4 then the original array was
-    % 400x400 and the center should be at 201 which is 51*4-3
-    %shiftY = ncy - (best_center_y * bin_factor - (bin_factor - 1));
+
     
     shiftX = (ncx_binned - best_center_x)*bin_factor;
     shiftY = (ncy_binned - best_center_y)*bin_factor;
@@ -73,16 +70,15 @@ for proj_num    = 1:num_proj
         original_projections(:,:,proj_num) = circshift(original_projections(:,:,proj_num),[shiftX, shiftY]);
     end
     ShiftAr(proj_num,:) = [shiftX, shiftY];
+    
+    obj.refineFullProjections(:,:,proj_num) = original_projections(:,:,proj_num);
+    obj.refineAngles(proj_num,:) = euler_angles(proj_num,:);
 end
-obj.refineFullProjections = original_projections;
 
-% recalculate the angles to make the reference index angles be at the same
-% given orientation
-%euler_angles = reorient_Angles(euler_angles,obj.RefineReferenceAngleInd,obj.RefineZeroCenterFlag,obj.RefineReferenceAngletoSet);
-
-obj.refineAngles = euler_angles;
 
 if obj.FullEvolutionRecord==1
-  obj.AngleEvolution(:,:,end+1) = euler_angles;
-  obj.ShiftEvolution(:,:,end+1) = ShiftAr;
+  obj.AngleEvolution(projectionSeq(1:size(obj.refineAngles,1)),:,end+1) = euler_angles;
+  obj.ShiftEvolution(projectionSeq(1:size(obj.refineAngles,1)),:,end+1) = ShiftAr;
+end
+
 end

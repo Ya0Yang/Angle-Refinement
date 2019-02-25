@@ -1,33 +1,18 @@
 
-function obj = refineOrientation_parallel(obj)
+function obj = refineOrientationProgressive(obj,currProjsNum,batchRefinement)
 
-% if length(unique(size(obj.refineModel))) ~= 1
-%     error('Model should be a cubic array')
-% else
-%     [dim1,dim2,~] = size(obj.refineModel);
-% end
-
-% pad model for projection calculation
-%padding = round(dim*(obj.oversampling_ratio-1)/2);
-%modelK = my_fft(padarray(obj.refineModel,[padding, padding, padding]));
-
-% in case of using real-space forward projector
-% if obj.RealProjection == 1
-%   modelK = obj.refineModel;
-% else
-%   modelK = my_fft(My_paddzero(obj.refineModel,round(size(obj.refineModel)*obj.oversampling_ratio)));
-% end
-
-num_proj = size(obj.refineProjections,3);
+num_proj = batchRefinement;
 num_calculations = length(obj.phi_search_range) * length(obj.theta_search_range) * length(obj.psi_search_range);
 
-metrics       = zeros(num_proj,num_calculations);
-phis          = zeros(num_proj,num_calculations);
-thetas        = zeros(num_proj,num_calculations);
-psis          = zeros(num_proj,num_calculations);
-x_centers     = zeros(num_proj,num_calculations);
-y_centers     = zeros(num_proj,num_calculations);
-bayes_probs   = zeros(num_proj,num_calculations);
+num_fulProjs = size(obj.refineFullProjections,3);
+
+metrics       = zeros(num_fulProjs,num_calculations);
+phis          = zeros(num_fulProjs,num_calculations);
+thetas        = zeros(num_fulProjs,num_calculations);
+psis          = zeros(num_fulProjs,num_calculations);
+x_centers     = zeros(num_fulProjs,num_calculations);
+y_centers     = zeros(num_fulProjs,num_calculations);
+bayes_probs   = zeros(num_fulProjs,num_calculations);
 
 if strcmp(obj.evaluator_type,'backprojection')
     EVALUATOR     = Backprojection_Evaluator(obj);
@@ -38,50 +23,26 @@ else
 end
 
 % separate arrays to avoid unnecessary broadcast variables
-projections            = obj.refineProjections;
 phiangles              = obj.refineAngles(:,1);
 thetaangles            = obj.refineAngles(:,2);
 psiangles              = obj.refineAngles(:,3);
 phi_search_range       = obj.phi_search_range;
 theta_search_range     = obj.theta_search_range;
 psi_search_range       = obj.psi_search_range;
-compare_func           = @obj.compare_func;
-forwardProjection_func = @obj.forwardProjection_func;
-FPmask                 = obj.FPmask;
 
-% cropInd1 =  (1:dim1)-ncx + nc_padded1;
-% cropInd2 =  (1:dim2)-ncy + nc_padded2;
-
-window_half_size = obj.window_half_size;
-Rscanres = obj.Rscanres;
-Rmethod = obj.Rmethod;
 
 EVALUATOR = EVALUATOR.prepData(); % todo: implement for backprojection type classes
-pjob = gcp('nocreate');
-if isempty(pjob)
-    parpool(obj.parpool_size)
-elseif pjob.NumWorkers ~= obj.parpool_size
-    delete(pjob)
-    parpool(obj.parpool_size)
-end
-parfor pj_num = 1:num_proj
-    fprintf('Refining projection #%d/%d\n',pj_num,num_proj)
-%     pj            = obj.refineProjections(:,:,pj_num);
-    phi           = phiangles;
-    theta         = thetaangles;
-    psi           = psiangles;
-%     noise_sigma   = obj.noise_sigma(:,:,pj_num);
+
+parfor pj_num = currProjsNum+1:currProjsNum+num_proj  %be very careful: now pj_num is not the real projection number but the number in the sequence
+    
+    fprintf('Refining projection #%d\n',pj_num)
+    
+    phi           = phiangles(pj_num);
+    theta         = thetaangles(pj_num);
+    psi           = psiangles(pj_num);
+    
     calc_count    = 1;
-    
-    FSind = find(FPmask(:,:,pj_num));
-    
-    if Rmethod == 1
-        VinCell = {window_half_size,Rscanres,FSind};
-    else
-        VinCell = {};
-    end
-    
-    
+
     
     % because of MATLAB's for rules have to create separate variables
     % for storing results and collect them later

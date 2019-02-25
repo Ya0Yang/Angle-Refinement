@@ -1,22 +1,6 @@
 
-function obj = refineOrientation_parallel(obj)
+function obj = refineOrientation_initial(obj)
 
-% if length(unique(size(obj.refineModel))) ~= 1
-%     error('Model should be a cubic array')
-% else
-%     [dim1,dim2,~] = size(obj.refineModel);
-% end
-
-% pad model for projection calculation
-%padding = round(dim*(obj.oversampling_ratio-1)/2);
-%modelK = my_fft(padarray(obj.refineModel,[padding, padding, padding]));
-
-% in case of using real-space forward projector
-% if obj.RealProjection == 1
-%   modelK = obj.refineModel;
-% else
-%   modelK = my_fft(My_paddzero(obj.refineModel,round(size(obj.refineModel)*obj.oversampling_ratio)));
-% end
 
 num_proj = size(obj.refineProjections,3);
 num_calculations = length(obj.phi_search_range) * length(obj.theta_search_range) * length(obj.psi_search_range);
@@ -57,19 +41,13 @@ Rscanres = obj.Rscanres;
 Rmethod = obj.Rmethod;
 
 EVALUATOR = EVALUATOR.prepData(); % todo: implement for backprojection type classes
-pjob = gcp('nocreate');
-if isempty(pjob)
-    parpool(obj.parpool_size)
-elseif pjob.NumWorkers ~= obj.parpool_size
-    delete(pjob)
-    parpool(obj.parpool_size)
-end
+
 parfor pj_num = 1:num_proj
     fprintf('Refining projection #%d/%d\n',pj_num,num_proj)
 %     pj            = obj.refineProjections(:,:,pj_num);
-    phi           = phiangles;
-    theta         = thetaangles;
-    psi           = psiangles;
+    phi           = obj.refineAngles(pj_num,1);
+    theta         = obj.refineAngles(pj_num,2);
+    psi           = obj.refineAngles(pj_num,3);
 %     noise_sigma   = obj.noise_sigma(:,:,pj_num);
     calc_count    = 1;
     
@@ -118,7 +96,7 @@ parfor pj_num = 1:num_proj
     bayes_probs(pj_num,:)      = tmp_bayes_probs; 
 end
 % collect results
-obj.x_centers   = x_centers;
+obj.x_centers   = x_centers;  %so x_centers are defined here, so don't worry about dimensions
 obj.y_centers   = y_centers;
 obj.metrics     = metrics;
 obj.phis        = phis;
