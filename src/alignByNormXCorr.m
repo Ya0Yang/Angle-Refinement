@@ -40,8 +40,8 @@ simg = smooth3D(img,smooth_factor);
 threshhold = max(simg(:)) .* threshhold_factor;
 m = smooth3D(img,smooth_factor)>threshhold;
 [sx,sy] = find(m~=0);
-template = img(min(sx(:)):max(sx(:)),min(sy(:)):max(sy(:)));
-template=img;
+template = img(min(sx(:)):max(sx(:)),min(sy(:)):max(sy(:)));%
+template=img; %obviously, the template is wasted
 
 xc = normxcorr2(template,ref_img);
 % xc = gather(normxcorr2(gpuArray(single(template)),gpuArray(single(ref_img))));

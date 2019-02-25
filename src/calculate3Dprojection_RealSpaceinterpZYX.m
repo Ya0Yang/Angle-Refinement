@@ -1,4 +1,4 @@
-function Proj = calculate3Dprojection_RealSpaceinterp(Vol, phi, theta, psi)
+function Proj = calculate3Dprojection_RealSpaceinterpZYX(Vol, phi, theta, psi)
     
     vector1 = [0 0 1];
     rotmat1 = MatrixQuaternionRot(vector1,phi);    

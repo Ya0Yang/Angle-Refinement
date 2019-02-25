@@ -16,7 +16,7 @@
 
 
 
-function [projection, kSlice] = calculate3Dprojection_interp(modelK,phi,theta,psi)
+function [projection, kSlice] = calculate3Dprojection_interp_xyz(modelK,phi,theta,psi)
 
 %get dimensions and centers
 [dimx, dimy, dimz] = size(modelK);
@@ -28,12 +28,25 @@ ncz = round((dimz+1)/2);
 [Y, X, Z] = meshgrid((1:dimy) - ncy, (1:dimx) - ncx, 0);
 
 %calculate rotation matrix
-R = [ cosd(psi)*cosd(theta)*cosd(phi)-sind(psi)*sind(phi) ,cosd(psi)*cosd(theta)*sind(phi)+sind(psi)*cosd(phi)   ,    -cosd(psi)*sind(theta);
-      -sind(psi)*cosd(theta)*cosd(phi)-cosd(psi)*sind(phi), -sind(psi)*cosd(theta)*sind(phi)+cosd(psi)*cosd(phi) ,   sind(psi)*sind(theta)  ;
-      sind(theta)*cosd(phi)                               , sind(theta)*sind(phi)                                ,              cosd(theta)];
+% R = [ cosd(psi)*cosd(theta)*cosd(phi)-sind(psi)*sind(phi) ,cosd(psi)*cosd(theta)*sind(phi)+sind(psi)*cosd(phi)   ,    -cosd(psi)*sind(theta);
+%       -sind(psi)*cosd(theta)*cosd(phi)-cosd(psi)*sind(phi), -sind(psi)*cosd(theta)*sind(phi)+cosd(psi)*cosd(phi) ,   sind(psi)*sind(theta)  ;
+%       sind(theta)*cosd(phi)                               , sind(theta)*sind(phi)                                ,              cosd(theta)];
 
-  
-[ky kx kz ] = meshgrid((1:dimy) - ncy, (1:dimx) - ncx, (1:dimz) - ncz);
+R1 = [cosd(phi) -sind(phi) 0;
+      sind(phi) cosd(phi) 0;
+      0          0         1];    
+    
+R2 = [cosd(theta) 0  sind(theta);
+        0         1      0;
+      -sind(theta) 0 cosd(theta)];
+
+R3 = [1   0   0;
+       0  cosd(psi) -sind(psi);
+      0   sind(psi) cosd(psi)];    
+    
+ R =(R1*R2*R3)';
+
+[ky, kx, kz] = meshgrid((1:dimy) - ncy, (1:dimx) - ncx, (1:dimz) - ncz);
 
 %rotate coordinates
 rotkCoords = R'*[X(:)';Y(:)';Z(:)'];
