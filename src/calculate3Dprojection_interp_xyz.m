@@ -46,7 +46,7 @@ R3 = [1   0   0;
     
  R =(R1*R2*R3)';
 
-[ky, kx, kz] = meshgrid((1:dimy) - ncy, (1:dimx) - ncx, (1:dimz) - ncz);
+[ky kx kz ] = meshgrid((1:dimy) - ncy, (1:dimx) - ncx, (1:dimz) - ncz);
 
 %rotate coordinates
 rotkCoords = R'*[X(:)';Y(:)';Z(:)'];

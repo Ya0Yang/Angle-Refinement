@@ -11,11 +11,12 @@ Rarr = zeros(1,size(Angles,1)); %% So here we are using the horizontal Angles.
 simuProjs = zeros(size(Projs,1),size(Projs,2));
 
 for i=1:size(Angles,1)
+    disp(i);
     currProj = Projs(:,:,i);
     backProjs = calculate3Dprojection_RealSpaceinterp(model,Angles(i,1),Angles(i,2),Angles(i,3));
     backProjs = My_stripzero(backProjs,size(currProj));
     Rarr(i) = sum( abs(abs(backProjs(:))-abs(currProj(:)))) / sum(abs(currProj(:)));
-    fprintf('Projection %g with Rfactor: %.5g',i,Rarr(i));
+    fprintf('Rfactor: %.5g \n',Rarr(i));
     simuProjs = cat(3,simuProjs,backProjs);
 end
 simuProjs = single(simuProjs);
