@@ -7,7 +7,7 @@ function calc_pj = calculate3Dprojection_interp_wrapperZYX(obj,phi,theta,psi)
 ncx           = round((dim1+1)/2);
 ncy           = round((dim2+1)/2);
 nc_padded1    = round((size(obj.modelK,1)+1)/2);
-nc_padded2    = round((size(obj.modelK,1)+1)/2);
+nc_padded2    = round((size(obj.modelK,1)+2)/2);
 cropInd1      = (1:dim1)-ncx + nc_padded1;
 cropInd2      = (1:dim2)-ncy + nc_padded2;
 
