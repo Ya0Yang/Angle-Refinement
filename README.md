@@ -1,6 +1,6 @@
 # Angle-Refinement
 
-Partially Brutal Force Angle Refinement based on GENFIRE
+Partially Brutal Force Angle Refinement based on GENFIRE/GRADIRE
 
 Assumption: each projection is individual from each other
 
